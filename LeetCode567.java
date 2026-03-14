@@ -1,31 +1,27 @@
-import java.util.HashMap;
-import java.util.Map;
 
 public class LeetCode567 {
     public boolean checkInclusion(String s1, String s2) {
-        if (s1.length() > s2.length()) return false;
-        Map<Character, Integer> map = new HashMap<>();
-        for (char c :  s1.toCharArray()) {
-            map.put(c, map.getOrDefault(c, 0) + 1);
+        int n1 = s1.length(), n2 = s2.length();
+        if (n1 > n2) return false;
+
+        int[] s1Count = new int[26];
+        int[] s2Count = new int[26]; //this is the sliding window
+
+        for (int i = 0; i < n1; i++) { //n1 = 2, n2 = 8
+            s1Count[s1.charAt(i) - 'a']++; //'ab' -> [1,1,0,0,0...]
+            s2Count[s2.charAt(i) - 'a']++; //'eidbaooo' -> [0,0,0,0,1,0,0,0,1,0,0,0...]
         }
-        for (int i = 0; i < s2.length(); i++) {
-            if (map.containsKey(s2.charAt(i)) && i + s1.length() <= s2.length()) {
-                Map<Character, Integer> temp = new HashMap<>(map);
-                for (int j = i; j < s1.length() + i; j++) {
-                    char c = s2.charAt(j);
-                    if (temp.containsKey(c)) {
-                        temp.put(c, temp.get(c) - 1);
-                        if (temp.get(c) < 0) {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                boolean allZero = temp.values().stream().allMatch(v -> v == 0);
-                if (allZero) return true;
-            }
+        for (int i = 0; i < n2 - n1; i++) {
+            if (matches(s1Count, s2Count)) return true;
+            s2Count[s2.charAt(i) - 'a']--;
+            s2Count[s2.charAt(i+n1) - 'a']++;
         }
-        return false;
+        return matches(s1Count, s2Count);
+    }
+    private boolean matches(int[] s1Count, int[] s2Count) {
+        for (int i = 0; i < 26; i++) {
+            if (s1Count[i] != s2Count[i]) return false;
+        }
+        return true;
     }
 }
